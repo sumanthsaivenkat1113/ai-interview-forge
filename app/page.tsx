@@ -1,9 +1,5 @@
-import Image from "next/image";
+import InterviewForge from "@/client/components/interviewForge";
 
 export default function Home() {
-  return (
-    <div>
-   hello world
-    </div>
-  );
+  return <InterviewForge/>
 }
