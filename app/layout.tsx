@@ -1,3 +1,4 @@
+import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -19,10 +20,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(roboto.variable)}>
-      <body className="min-h-screen bg-background text-foreground antialiased">
-        {children}
-      </body>
-    </html>
+    <ClerkProvider
+      signInForceRedirectUrl="/home"
+      signUpForceRedirectUrl="/home"
+    >
+      <html lang="en" className={cn(roboto.variable)}>
+        <body className="min-h-screen bg-background text-foreground antialiased">
+
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
