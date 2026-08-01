@@ -4,7 +4,22 @@ import { UserButton } from "@clerk/nextjs";
 import DashboardSidebar from "../Sidebar";
 import InterviewSection from "../Main/InterviewSection";
 
-export default function Dashboard() {
+interface DashboardProps {
+  user: {
+    id: number;
+    clerkId: string;
+    email: string;
+    name: string;
+    profileImageUrl: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    lastLoginAt: Date | null;
+  };
+}
+
+export default function Dashboard({ user }: DashboardProps) {
+  const firstName = user.name.split(" ")[0];
+
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar />
@@ -14,7 +29,7 @@ export default function Dashboard() {
           <section className="flex items-center justify-between border-b pb-8">
             <div className="space-y-2">
               <h1 className="text-4xl font-semibold tracking-tight">
-                Welcome back
+                Welcome back, {firstName}
               </h1>
 
               <p className="text-muted-foreground">
