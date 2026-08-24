@@ -1,11 +1,12 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import DashboardSidebar from "../Sidebar";
 import WorkspaceHeader from "../WorkspaceHeader";
 import WorkspaceStepper from "../WorkspaceStepper";
 import WorkspaceForm from "../WorkspaceForm";
 
 export default function WorkspaceFMI() {
+  const router = useRouter();
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar />
@@ -17,6 +18,30 @@ export default function WorkspaceFMI() {
           <WorkspaceForm
             onSuccess={(workspaceId) => {
               // 
+
+              // The workspace and resume have both
+              // been successfully created.
+
+              // If the user has experience,
+              // go to the FMIE interview.
+              if (
+                Number(
+                  // WorkspaceForm doesn't currently
+                  // expose yearsOfExperience here.
+                  // See note below.
+                  0
+                ) > 0
+              ) {
+                router.push(
+                  `/workspace10/interview/FMIE/${workspaceId}`
+                );
+              } else {
+                router.push(
+                  `/workspace10/interview/${workspaceId}`
+                );
+              }
+
+
             }}
           />
         </div>
