@@ -1,5 +1,7 @@
 import WorkspaceI from "@/client/components/workspaceI/workspaceI";
+import { auth } from '@clerk/nextjs/server'
 
-export default function workspaceIPage(){
-    return <WorkspaceI/>
+export default async function workspaceIPage() {
+    await auth.protect()
+    return <WorkspaceI />
 }
