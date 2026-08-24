@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/client/components/ui/badge";
 import {
   ArrowRight,
@@ -7,6 +9,7 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface Props {
   title: string;
@@ -15,6 +18,7 @@ interface Props {
   duration: string;
   icon: LucideIcon;
   iconColor: string;
+  href: string;
 }
 
 export default function InterviewCard({
@@ -24,9 +28,13 @@ export default function InterviewCard({
   duration,
   icon: Icon,
   iconColor,
+  href,
 }: Props) {
+  const router = useRouter();
   return (
     <button
+      type="button"
+      onClick={() => router.push(href)}
       className="
         group
         relative
@@ -42,6 +50,7 @@ export default function InterviewCard({
         hover:-translate-y-1
         hover:border-primary/30
         hover:shadow-lg
+        cursor-pointer
       "
     >
       {/* Accent line */}

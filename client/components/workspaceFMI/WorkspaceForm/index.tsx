@@ -6,7 +6,6 @@ import { Label } from "@/client/components/ui/label";
 import { Button } from "@/client/components/ui/button";
 import { ArrowRight, Building2, FileText, ListChecks, Loader2, UserRound } from "lucide-react";
 import TextField from "../TextField";
-import JobDescriptionField from "../JobDescriptionField";
 import ResumeUploadField from "../ResumeUploadField";
 import ExperienceField from "../ExperienceField";
 import { ROLE_SUGGESTIONS, TARGET_COMPANIES_SUGGESTIONS } from "../lib/constants";
@@ -125,16 +124,12 @@ export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
         </div>
 
         {/* Upload Row: Resume + JD */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
           <ResumeUploadField
             file={form.resumeFile}
             onFileChange={(file) => update("resumeFile", file)}
             error={resumeError}
             onError={setResumeError}
-          />
-          <JobDescriptionField
-            value={form.jobDescription}
-            onChange={(v) => update("jobDescription", v)}
           />
         </div>
 

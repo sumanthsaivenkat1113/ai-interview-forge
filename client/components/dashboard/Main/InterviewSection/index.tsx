@@ -32,6 +32,7 @@ export default function InterviewSection() {
           description="Experience a realistic interview with technical questions, coding rounds, and detailed AI-powered feedback."
           icon={MessagesSquare}
           iconColor="bg-violet-500/15 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400"
+          href="/workspace/full-mock-interview"
         />
 
         <InterviewCard
@@ -41,6 +42,7 @@ export default function InterviewSection() {
           description="Practice specific subjects like React, DSA, JavaScript, SQL, and System Design at your own pace."
           icon={BookOpenText}
           iconColor="bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+          href="/workspace/interview"
         />
       </div>
     </section>
