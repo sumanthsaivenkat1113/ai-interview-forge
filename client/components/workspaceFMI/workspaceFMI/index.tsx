@@ -16,9 +16,7 @@ export default function WorkspaceFMI() {
           <WorkspaceStepper currentStep={0} />
           <WorkspaceForm
             onSuccess={(workspaceId) => {
-              // TODO: route to step 3 (AI Interview) once the backend
-              // returns the created workspace id
-              // router.push(`/dashboard/ai-interview/${workspaceId}`)
+              // 
             }}
           />
         </div>

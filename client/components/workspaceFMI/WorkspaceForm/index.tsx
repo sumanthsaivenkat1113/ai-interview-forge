@@ -53,7 +53,6 @@ export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
     try {
       const payload = new FormData();
       payload.append("workspaceName", form.workspaceName.trim());
-      payload.append("jobDescription", form.jobDescription.trim());
       payload.append("targetCompany", form.targetCompany.trim());
       payload.append("targetRole", form.targetRole.trim());
       payload.append("yearsOfExperience", form.yearsOfExperience);

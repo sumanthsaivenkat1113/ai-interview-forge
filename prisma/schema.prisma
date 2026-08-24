@@ -12,42 +12,65 @@ datasource db {
   provider = "postgresql"
 }
 
-
-
-
-
-
-
-//////////////////////////////////////////////////////
-// ENUMS
-//////////////////////////////////////////////////////
-
-enum InterviewType {
-  FULL_MOCK
-  CODING
-  THEORY
-}
-
-enum InterviewStatus {
-  IN_PROGRESS
-  COMPLETED
-  ABANDONED
-}
-
 //////////////////////////////////////////////////////
 // USER
 //////////////////////////////////////////////////////
 
 model User {
-  id              Int       @id @default(autoincrement())
-  clerkId         String    @unique
-  email           String    @unique
+  id              Int     @id @default(autoincrement())
+  clerkId         String  @unique
+  email           String  @unique
   name            String
   profileImageUrl String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   lastLoginAt DateTime?
 
+  // One User -> Many Workspaces
+  workspaces Workspace[]
+}
 
+//////////////////////////////////////////////////////
+// WORKSPACE
+//////////////////////////////////////////////////////
+
+model Workspace {
+  id                  String @id @default(uuid())
+  workspace           String
+  target_company      String
+  target_role         String
+  years_of_experience Int
+
+  // User relationship
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // One Workspace -> One ResumePdfDetails
+  resume ResumePdfDetails?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//////////////////////////////////////////////////////
+// RESUME PDF DETAILS
+//////////////////////////////////////////////////////
+
+model ResumePdfDetails {
+  id          String @id @default(uuid())
+  fileName    String
+  text        String
+  pages       Int
+  skills      String
+  project     String
+  experience  String
+  otherFields String
+
+  // One-to-one relationship with Workspace
+  workspaceId String    @unique
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
