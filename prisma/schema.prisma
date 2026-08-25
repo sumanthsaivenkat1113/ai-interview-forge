@@ -17,18 +17,15 @@ datasource db {
 //////////////////////////////////////////////////////
 
 model User {
-  id              Int     @id @default(autoincrement())
-  clerkId         String  @unique
-  email           String  @unique
+  id              Int         @id @default(autoincrement())
+  clerkId         String      @unique
+  email           String      @unique
   name            String
   profileImageUrl String?
-
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  lastLoginAt DateTime?
-
-  // One User -> Many Workspaces
-  workspaces Workspace[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  lastLoginAt     DateTime?
+  workspaces      Workspace[]
 }
 
 //////////////////////////////////////////////////////
@@ -36,21 +33,20 @@ model User {
 //////////////////////////////////////////////////////
 
 model Workspace {
-  id                  String @id @default(uuid())
+  id                  String            @id @default(uuid())
   workspace           String
   target_company      String
   target_role         String
   years_of_experience Int
+  userId              Int
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume              ResumePdfDetails?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  questions           questions[]
+  codingQuestions     CodingQuestion[]
 
-  // User relationship
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // One Workspace -> One ResumePdfDetails
-  resume ResumePdfDetails?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@unique([userId, workspace])
 }
 
 //////////////////////////////////////////////////////
@@ -58,7 +54,7 @@ model Workspace {
 //////////////////////////////////////////////////////
 
 model ResumePdfDetails {
-  id          String @id @default(uuid())
+  id          String    @id @default(uuid())
   fileName    String
   text        String
   pages       Int
@@ -66,11 +62,63 @@ model ResumePdfDetails {
   project     String
   experience  String
   otherFields String
-
-  // One-to-one relationship with Workspace
   workspaceId String    @unique
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+//////////////////////////////////////////////////////
+// QUESTIONS 
+//////////////////////////////////////////////////////
+
+model questions {
+  id          String    @id @default(uuid())
+  qno         Int
+  question    String
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  answers   answers[]
+}
+
+model CodingQuestion {
+  id                String @id @default(uuid())
+  qno               Int
+  problem_statement String
+  examples          Json
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  codingAnswers CodingAnswers[]
+
+  @@index([workspaceId])
+}
+
+//////////////////////////////////////////////////////
+// ANSWERS
+//////////////////////////////////////////////////////
+
+model answers {
+  id         String    @id @default(uuid())
+  qno        Int
+  answer     String
+  questionId String
+  questions  questions @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model CodingAnswers {
+  id               String         @id @default(uuid())
+  answer           String
+  codingQuestionId String
+  CodingQuestions  CodingQuestion @relation(fields: [codingQuestionId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }

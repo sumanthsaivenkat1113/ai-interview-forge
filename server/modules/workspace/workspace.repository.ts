@@ -132,5 +132,22 @@ export const WorkspaceRepository = {
                 workspaceId,
             },
         });
+    },
+
+
+    async isWorkspaceUnique(
+        userId: number,
+        workspace: string
+    ): Promise<boolean> {
+        const existingWorkspace = await prisma.workspace.findUnique({
+            where: {
+                userId_workspace: {
+                    userId,
+                    workspace,
+                },
+            },
+        });
+
+        return existingWorkspace === null;
     }
 }

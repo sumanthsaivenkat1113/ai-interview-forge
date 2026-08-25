@@ -77,3 +77,66 @@ export async function callGroqJSON_NUP<T = unknown>(
     throw error;
   }
 }
+
+
+
+
+
+
+
+
+
+type GroqJsonSchema = {
+  name: string;
+  schema: Record<string, unknown>;
+  strict?: boolean;
+};
+
+export async function callGroqJSONResumeParser<T = unknown>(
+  systemPrompt: string,
+  userPrompt: string,
+  model: string,
+  max_completion_tokens: number,
+  temperature: number = 0.1,
+  schema?: GroqJsonSchema,
+): Promise<T> {
+  try {
+    const completion = await groqClient.chat.completions.create({
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature,
+      max_completion_tokens,
+
+      reasoning_effort: "low",
+
+      ...(schema
+        ? {
+            response_format: {
+              type: "json_schema",
+              json_schema: schema,
+            },
+          }
+        : {
+            response_format: {
+              type: "json_object",
+            },
+          }),
+    });
+
+    const content = completion.choices[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Groq returned an empty response");
+    }
+
+    console.log("[LLM-RESUME-Parser] =>", content);
+
+    return JSON.parse(content) as T;
+  } catch (error) {
+    console.error("[GroqProvider] Failed to generate JSON response:", error);
+    throw error;
+  }
+}

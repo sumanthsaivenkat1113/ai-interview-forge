@@ -1,31 +1,69 @@
-import { ResumeParserSystemPrompt, ResumeParserUserPrompt } from "@/server/modules/resume/resume.parser.prompt";
-import { callGroqJSON_NUP, callGroqJSON } from "@/server/providers/groq/LLM/groq.provider";
+import {
+  ResumeParserSystemPrompt,
+  ResumeParserUserPrompt,
+} from "@/server/modules/resume/resume.parser.prompt";
+
+import { callGroqJSONResumeParser } from "@/server/providers/groq/LLM/groq.provider";
+
 import { GroqLLMModels } from "@/server/providers/groq/LLM/groq.models";
 
-/**
- * extracts the sections in resume.
- */
-
 interface ResumeData {
-    skills: string,
-    projects: string,
-    experience: string,
-    otherFields: string,
+  skills: string;
+  projects: string;
+  experience: string;
+  otherFields: string;
 }
 
-
+/**
+ * Extracts structured sections from a resume using Groq.
+ */
 export async function getResumeSections(
-    resumeText: string
-) {
-    const systemPrompt = ResumeParserSystemPrompt();
-    const userPrompt = ResumeParserUserPrompt(resumeText)
+  resumeText: string
+): Promise<ResumeData> {
+  const systemPrompt = ResumeParserSystemPrompt();
+  const userPrompt = ResumeParserUserPrompt(resumeText);
 
-    const resumeSections = await callGroqJSON<ResumeData>(
-        systemPrompt,
-        userPrompt,
-        GroqLLMModels.openai_gpt_oss_20b,
-        3500,
-        0.1
-    );
-    return resumeSections;
+  const resumeSections = await callGroqJSONResumeParser<ResumeData>(
+    systemPrompt,
+    userPrompt,
+    GroqLLMModels.openai_gpt_oss_20b,
+    2000,
+    0.1,
+    {
+      name: "resume_sections",
+      strict: true,
+      schema: {
+        type: "object",
+
+        properties: {
+          skills: {
+            type: "string",
+          },
+
+          projects: {
+            type: "string",
+          },
+
+          experience: {
+            type: "string",
+          },
+
+          otherFields: {
+            type: "string",
+          },
+        },
+
+        required: [
+          "skills",
+          "projects",
+          "experience",
+          "otherFields",
+        ],
+
+        additionalProperties: false,
+      },
+    }
+  );
+
+  return resumeSections;
 }

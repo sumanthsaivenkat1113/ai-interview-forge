@@ -50,6 +50,17 @@ export const WorkspaceService = {
         return WorkspaceRepository.findById(id);
     },
 
+    async isWorkspaceUnique(
+        userId: number,
+        workspace: string
+    ): Promise<boolean> {
+        return WorkspaceRepository.isWorkspaceUnique(
+            userId,
+            workspace.trim()
+        );
+    },
+
+
     async create(data: createWorkspaceDTO) {
         return WorkspaceRepository.create(data);
     },
@@ -58,7 +69,7 @@ export const WorkspaceService = {
         return WorkspaceRepository.delete(id);
     },
 
-    async getResume(workspaceId: string){
+    async getResume(workspaceId: string) {
         return WorkspaceRepository.getResume(workspaceId)
     }
 

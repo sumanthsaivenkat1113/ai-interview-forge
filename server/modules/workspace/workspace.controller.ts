@@ -57,6 +57,61 @@ export const WorkspaceController = {
             success: true,
             message: 'workspace deleted successfully'
         })
+    },
+
+
+
+
+    async isWorkspaceUnique(req: Request) {
+        try {
+            const body = await req.json();
+
+            const { userId, workspace } = body;
+
+            if (
+                userId === undefined ||
+                userId === null ||
+                !workspace ||
+                typeof workspace !== "string"
+            ) {
+                return Response.json(
+                    {
+                        success: false,
+                        error: "userId and workspace are required!",
+                    },
+                    {
+                        status: 400,
+                    }
+                );
+            }
+
+            const isUnique = await WorkspaceService.isWorkspaceUnique(
+                Number(userId),
+                workspace.trim()
+            );
+
+            return Response.json(
+                {
+                    success: true,
+                    data: isUnique,
+                },
+                {
+                    status: 200,
+                }
+            );
+        } catch (error) {
+            console.error("Check workspace uniqueness error:", error);
+
+            return Response.json(
+                {
+                    success: false,
+                    error: "Failed to check workspace uniqueness",
+                },
+                {
+                    status: 500,
+                }
+            );
+        }
     }
 
 }

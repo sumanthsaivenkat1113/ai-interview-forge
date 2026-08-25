@@ -92,6 +92,8 @@ export default function WorkspaceForm({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+
+
   const update = <K extends keyof WorkspaceFormState>(
     key: K,
     value: WorkspaceFormState[K]
@@ -126,8 +128,7 @@ export default function WorkspaceForm({
         method: "GET",
       });
 
-      const userResult: UserResponse =
-        await userResponse.json();
+      const userResult: UserResponse = await userResponse.json();
 
       if (!userResponse.ok) {
         throw new Error(
@@ -135,8 +136,7 @@ export default function WorkspaceForm({
         );
       }
 
-      const userId =
-        userResult.data?.id ?? userResult.id;
+      const userId = userResult.data?.id ?? userResult.id;
 
       if (!userId) {
         throw new Error(
@@ -146,6 +146,40 @@ export default function WorkspaceForm({
 
       /*
        * STEP 1
+       * Check workspace uniqueness
+       */
+      const isWorkspaceUniqueResponse = await fetch(
+        "/api/v1/workspace/is-unique",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: Number(userId),
+            workspace: form.workspaceName.trim(),
+          }),
+        }
+      );
+
+      const isWorkspaceUniqueResult =
+        await isWorkspaceUniqueResponse.json();
+
+      if (!isWorkspaceUniqueResponse.ok) {
+        throw new Error(
+          isWorkspaceUniqueResult.error ||
+          "Failed to check workspace availability."
+        );
+      }
+
+      if (!isWorkspaceUniqueResult.data) {
+        throw new Error(
+          `The workspace "${form.workspaceName.trim()}" already exists. Please choose a different name.`
+        );
+      }
+
+      /*
+       * STEP 2
        * Create workspace
        */
       const workspaceResponse = await fetch(
@@ -156,7 +190,7 @@ export default function WorkspaceForm({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: userId,
+            userId: Number(userId),
             workspace: form.workspaceName.trim(),
             target_company: form.targetCompany.trim(),
             target_role: form.targetRole.trim(),
@@ -176,7 +210,7 @@ export default function WorkspaceForm({
       ) {
         throw new Error(
           workspaceResult.error ||
-            "Failed to create workspace."
+          "Failed to create workspace."
         );
       }
 
@@ -189,7 +223,7 @@ export default function WorkspaceForm({
       const workspaceId = workspaceResult.data.id;
 
       /*
-       * STEP 2
+       * STEP 3
        * Upload resume
        */
       if (!form.resumeFile) {
@@ -218,7 +252,7 @@ export default function WorkspaceForm({
       ) {
         throw new Error(
           resumeResult.error ||
-            "Failed to upload resume."
+          "Failed to upload resume."
         );
       }
 
@@ -229,13 +263,58 @@ export default function WorkspaceForm({
       }
 
       /*
-       * STEP 3
-       * Tell parent that workspace + resume
-       * were successfully created.
+       * STEP 4
+       * Generate interview questions
+       */
+      const interviewEndpoint =
+        Number(form.yearsOfExperience) > 0
+          ? "/api/v1/interview/workspace/FMIE"
+          : "/api/v1/interview/workspace";
+
+      const generateRes = await fetch(
+        interviewEndpoint,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            workspaceId,
+          }),
+        }
+      );
+
+      const generateText = await generateRes.text();
+
+      let generateResult: {
+        success?: boolean;
+        error?: string;
+      } = {};
+
+      try {
+        generateResult = generateText
+          ? JSON.parse(generateText)
+          : {};
+      } catch {
+        // Response wasn't JSON
+      }
+
+      if (
+        !generateRes.ok ||
+        generateResult.success === false
+      ) {
+        throw new Error(
+          generateResult.error ||
+          `Failed to generate Interview questions (${generateRes.status}).`
+        );
+      }
+
+      /*
+       * Everything succeeded
        */
       onSuccess?.(workspaceId);
     } catch (err) {
-      console.error(err);
+      console.error("Workspace submission error:", err);
 
       setSubmitError(
         err instanceof Error
