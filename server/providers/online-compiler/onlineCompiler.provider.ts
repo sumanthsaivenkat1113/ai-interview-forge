@@ -1,7 +1,7 @@
 import {
     onlineCompilerClient,
     type OnlineCompilerParams,
-} from "@/providers/online-compiler/onlineCompiler.client";
+} from "@/server/providers/online-compiler/onlineCompiler.client";
 
 export async function callOnlineCompilerJSON({
     code,

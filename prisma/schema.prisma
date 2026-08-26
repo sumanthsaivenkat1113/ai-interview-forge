@@ -122,3 +122,13 @@ model CodingAnswers {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }
+
+
+//////////////////////////////////////////////////////
+// STT
+//////////////////////////////////////////////////////
+
+model stt {
+  id   String @id @default(uuid())
+  text String
+}

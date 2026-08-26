@@ -1,4 +1,4 @@
-import { envOnlineCompiler } from "@/config/onlineCompiler.env";
+import { envOnlineCompiler } from "@/server/config/onlineCompiler.env";
 
 export interface OnlineCompilerParams {
     code: string;

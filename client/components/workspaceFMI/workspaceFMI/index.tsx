@@ -12,36 +12,20 @@ export default function WorkspaceFMI() {
       <DashboardSidebar />
 
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-4xl space-y-6 p-6 pt-8">
+        <div className="mx-auto max-w-7xl space-y-4 p-6 pt-8">
           <WorkspaceHeader />
           <WorkspaceStepper currentStep={0} />
           <WorkspaceForm
-            onSuccess={(workspaceId) => {
-              // 
-
-              // The workspace and resume have both
-              // been successfully created.
-
-              // If the user has experience,
-              // go to the FMIE interview.
-              if (
-                Number(
-                  // WorkspaceForm doesn't currently
-                  // expose yearsOfExperience here.
-                  // See note below.
-                  0
-                ) > 0
-              ) {
+            onSuccess={(workspaceId, yearsOfExperience) => {
+              if (yearsOfExperience > 0) {
                 router.push(
-                  `/workspace10/interview/FMIE/${workspaceId}`
+                  `/full-mock-interview-experience/${workspaceId}`
                 );
               } else {
                 router.push(
-                  `/workspace10/interview/${workspaceId}`
+                  `/full-mock-interview/${workspaceId}`
                 );
               }
-
-
             }}
           />
         </div>

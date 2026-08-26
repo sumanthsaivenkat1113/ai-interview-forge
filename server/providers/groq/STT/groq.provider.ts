@@ -1,4 +1,4 @@
-import { groqClient } from "@/providers/groq/groqClient";
+import { groqClient } from "@/server/providers/groq/groqClient";
 
 export const groqSTT = {
     async transcribe({

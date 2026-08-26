@@ -75,7 +75,10 @@ const INITIAL_STATE: WorkspaceFormState = {
 };
 
 interface WorkspaceFormProps {
-  onSuccess?: (workspaceId: string) => void;
+  onSuccess?: (
+    workspaceId: string,
+    yearsOfExperience: number
+  ) => void;
 }
 
 export default function WorkspaceForm({
@@ -312,7 +315,10 @@ export default function WorkspaceForm({
       /*
        * Everything succeeded
        */
-      onSuccess?.(workspaceId);
+      onSuccess?.(
+        workspaceId,
+        Number(form.yearsOfExperience)
+      );
     } catch (err) {
       console.error("Workspace submission error:", err);
 
