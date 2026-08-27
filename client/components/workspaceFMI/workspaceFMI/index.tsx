@@ -19,7 +19,7 @@ export default function WorkspaceFMI() {
             onSuccess={(workspaceId, yearsOfExperience) => {
               if (yearsOfExperience > 0) {
                 router.push(
-                  `/full-mock-interview-experience/${workspaceId}`
+                  `/full-mock-interview/experience/${workspaceId}`
                 );
               } else {
                 router.push(

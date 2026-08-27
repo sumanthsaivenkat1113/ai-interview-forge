@@ -11,6 +11,8 @@ import { useInterviewTTS } from '@/client/hooks/useInterviewTTS';
 import { useInterviewSTT } from '@/client/hooks/useInterviewSTT';
 import { fraunces, inter, jetbrainsMono } from '@/client/fonts/theory-interview';
 
+import { ErrorModal } from '@/client/components/ErrorModal';
+
 import InterviewStart from '@/client/components/theory-interview/InterviewStart';
 import InterviewHeader from '@/client/components/theory-interview/InterviewHeader';
 import Interviewer from '@/client/components/theory-interview/Interviewer';
@@ -31,6 +33,13 @@ interface InterviewAnswer {
     answer: string;
 }
 
+type InterviewError = {
+    message: string;
+    redirectPath: string;
+    redirectLabel: string;
+};
+
+
 // Loads the font variables once and applies the `dark` class so the
 // bg-background / text-foreground / etc. tokens resolve to the values in
 // theme.css. Drop the `dark` class here if your app already applies it
@@ -47,12 +56,18 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 export default function ViewInterviewQuestions() {
+    // ─────────────────────────────────────────────────────────────
+    // 1. ALL HOOKS LIVE HERE — UNCONDITIONALLY, EVERY RENDER.
+    //    No `if`/`return` is allowed to sit between any of these.
+    // ─────────────────────────────────────────────────────────────
     const params = useParams();
     const router = useRouter();
     const workspaceId = params.workspaceId as string;
 
     const { isLoaded, isSignedIn } = useAuth();
 
+    const [interviewError, setInterviewError] =
+        useState<InterviewError | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -71,6 +86,74 @@ export default function ViewInterviewQuestions() {
         }
     }, [isLoaded, isSignedIn, router]);
 
+    // check the Interview exists and is interview completed
+    useEffect(() => {
+        async function checkInterview() {
+            try {
+                const response = await fetch(
+                    "/api/v1/check/theory",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            workspaceId,
+                        }),
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Failed to check theory interview."
+                    );
+                }
+
+                const result = await response.json();
+
+                const {
+                    exists,
+                    completed,
+                } = result.data;
+
+                if (!exists) {
+                    setInterviewError({
+                        message:
+                            "The interview does not exist in the system.",
+                        redirectPath: "/home",
+                        redirectLabel: "Go to Homepage",
+                    });
+
+                    return;
+                }
+
+                if (completed) {
+                    setInterviewError({
+                        message:
+                            "The interview is already completed.",
+                        redirectPath: "/home",
+                        redirectLabel: "Go to Homepage",
+                    });
+
+                    return;
+                }
+            } catch (error) {
+                console.error(error);
+
+                setInterviewError({
+                    message:
+                        "Unable to check the interview status.",
+                    redirectPath: "/home",
+                    redirectLabel: "Go to Homepage",
+                });
+            }
+        }
+
+        if (workspaceId) {
+            checkInterview();
+        }
+    }, [workspaceId]);
+
     // TTS
     const { speak, isSpeaking, error: ttsError } = useInterviewTTS();
 
@@ -87,8 +170,6 @@ export default function ViewInterviewQuestions() {
             saveAnswer(questions[currentQuestionIndex], text);
         },
     });
-
-    const currentQuestion = questions[currentQuestionIndex];
 
     // Fetch Questions
     useEffect(() => {
@@ -130,6 +211,24 @@ export default function ViewInterviewQuestions() {
         if (sttError) setError(sttError);
     }, [sttError]);
 
+    // Speak next question
+    useEffect(() => {
+        if (!interviewStarted || !currentQuestion) return;
+        if (currentQuestionIndex === 0) return;
+        setCurrentAnswer('');
+        speak(currentQuestion.question);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentQuestionIndex, interviewStarted]);
+
+    // Derived value — plain const, not a hook, but keep it above anything
+    // that reads it (the effect above and the handlers below).
+    const currentQuestion = questions[currentQuestionIndex];
+
+    // ─────────────────────────────────────────────────────────────
+    // 2. Plain functions (not hooks) — fine to define anywhere,
+    //    but keeping them together after the hooks is clearest.
+    // ─────────────────────────────────────────────────────────────
+
     // Start Interview
     function startInterview() {
         if (!questions.length) return;
@@ -139,14 +238,6 @@ export default function ViewInterviewQuestions() {
         setAnswers([]);
         setTimeout(() => speak(questions[0].question), 400);
     }
-
-    // Speak next question
-    useEffect(() => {
-        if (!interviewStarted || !currentQuestion) return;
-        if (currentQuestionIndex === 0) return;
-        setCurrentAnswer('');
-        speak(currentQuestion.question);
-    }, [currentQuestionIndex, interviewStarted]);
 
     // Save answer
     function saveAnswer(question: Question, answer: string) {
@@ -235,13 +326,30 @@ export default function ViewInterviewQuestions() {
 
             const data = await response.json();
             console.log('Interview completed:', data);
-            router.push(`/workspace10/interview/${workspaceId}/coding`);
+            router.push(`/coding/${workspaceId}/`);
         } catch (err) {
             console.error('Error saving answers:', err);
             setError('Could not save your interview. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 3. ALL CONDITIONAL RETURNS GO HERE — AFTER EVERY HOOK CALL.
+    //    From this point on it's safe to branch, because React has
+    //    already called every hook it expects to call this render.
+    // ─────────────────────────────────────────────────────────────
+
+    // interview Errors
+    if (interviewError) {
+        return (
+            <ErrorModal
+                message={interviewError.message}
+                redirectPath={interviewError.redirectPath}
+                redirectLabel={interviewError.redirectLabel}
+            />
+        );
     }
 
     // Loading

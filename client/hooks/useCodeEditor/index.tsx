@@ -15,7 +15,15 @@ import {
     ExecutionMeta,
 } from "@/client/types/coding-interview/types";
 
+/* =========================================================
+   TYPES
+========================================================= */
 
+type InterviewError = {
+    message: string;
+    redirectPath: string;
+    redirectLabel: string;
+};
 
 /* =========================================================
    HOOK — encapsulates every piece of state, every effect,
@@ -34,6 +42,13 @@ export function useCodeEditor() {
      */
 
     const workspaceId = params.workspaceId as string;
+
+    /* =====================================================
+       INTERVIEW GUARD STATE
+    ===================================================== */
+
+    const [interviewError, setInterviewError] =
+        useState<InterviewError | null>(null);
 
     /* =====================================================
        QUESTION STATE
@@ -99,6 +114,77 @@ export function useCodeEditor() {
     ===================================================== */
 
     const currentQuestion = questions[currentQuestionIndex];
+
+    /* =====================================================
+       CHECK CODING INTERVIEW EXISTS / COMPLETED
+    ===================================================== */
+
+    useEffect(() => {
+        async function checkCodingInterview() {
+            try {
+                const response = await fetch(
+                    "/api/v1/check/coding",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            workspaceId,
+                        }),
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Failed to check coding interview."
+                    );
+                }
+
+                const result = await response.json();
+
+                const {
+                    exists,
+                    completed,
+                } = result.data;
+
+                if (!exists) {
+                    setInterviewError({
+                        message:
+                            "The interview does not exist in the system.",
+                        redirectPath: "/home",
+                        redirectLabel: "Go to Homepage",
+                    });
+
+                    return;
+                }
+
+                if (completed) {
+                    setInterviewError({
+                        message:
+                            "The interview is already completed.",
+                        redirectPath: "/home",
+                        redirectLabel: "Go to Homepage",
+                    });
+
+                    return;
+                }
+            } catch (error) {
+                console.error(error);
+
+                setInterviewError({
+                    message:
+                        "Unable to check the interview status.",
+                    redirectPath: "/home",
+                    redirectLabel: "Go to Homepage",
+                });
+            }
+        }
+
+        if (workspaceId) {
+            checkCodingInterview();
+        }
+    }, [workspaceId]);
 
     /* =====================================================
        FETCH CODING QUESTIONS
@@ -418,19 +504,11 @@ export function useCodeEditor() {
                 return;
             }
 
-            const evaluateFmiData = await evaluateFmiResponse.json();
-
-            const theoryEvaluationId = evaluateFmiData.results.theoryEvaluationId;
-            const codingEvaluationId = evaluateFmiData.results.codingEvaluationId;
-
-
-
-
             /*
              * Interview completed.
              */
 
-            router.push(`/workspace10/interview/${workspaceId}/results/${theoryEvaluationId}/${codingEvaluationId}`);
+            router.push(`/results/${workspaceId}`);
         } catch (error: any) {
             console.error("Submit interview error:", error);
 
@@ -444,6 +522,9 @@ export function useCodeEditor() {
 
     return {
         router,
+
+        // interview guard state
+        interviewError,
 
         // question state
         questions,

@@ -2,6 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useCodeEditor } from "@/client/hooks/useCodeEditor";
+import { ErrorModal } from "@/client/components/ErrorModal";
 import { Header } from "@/client/components/coding-interview/Header";
 import { ProblemPanel } from "@/client/components/coding-interview/ProblemPanel";
 import { EditorToolbar } from "@/client/components/coding-interview/EditorToolbar";
@@ -17,6 +18,7 @@ export { compilers } from "@/client/constants/coding-interview/constants";
 export default function CodeEditor() {
     const {
         router,
+        interviewError,
         questions,
         currentQuestionIndex,
         currentQuestion,
@@ -40,6 +42,20 @@ export default function CodeEditor() {
         runCode,
         submitInterview,
     } = useCodeEditor();
+
+    /* =====================================================
+       INTERVIEW ERROR (doesn't exist / already completed)
+    ===================================================== */
+
+    if (interviewError) {
+        return (
+            <ErrorModal
+                message={interviewError.message}
+                redirectPath={interviewError.redirectPath}
+                redirectLabel={interviewError.redirectLabel}
+            />
+        );
+    }
 
     /* =====================================================
        LOADING
