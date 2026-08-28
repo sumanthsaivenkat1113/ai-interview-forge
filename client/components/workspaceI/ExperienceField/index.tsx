@@ -18,6 +18,13 @@ interface ExperienceFieldProps {
 export default function ExperienceField({ value, onChange }: ExperienceFieldProps) {
   const selectedLabel = EXPERIENCE_OPTIONS.find((opt) => opt.value === value)?.label;
 
+  // Fix: Handle null values from Select
+  const handleValueChange = (newValue: string | null) => {
+    if (newValue !== null) {
+      onChange(newValue);
+    }
+  };
+
   return (
     <div className="rounded-xl border border-border/50 bg-card/30 p-4">
       <div className="mb-3 flex items-center gap-3">
@@ -30,7 +37,7 @@ export default function ExperienceField({ value, onChange }: ExperienceFieldProp
         </div>
       </div>
 
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={handleValueChange}>
         <SelectTrigger className="h-10 border-border/50 bg-background/50 text-sm">
           <SelectValue placeholder="Select experience" />
         </SelectTrigger>

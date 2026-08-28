@@ -1,7 +1,7 @@
 import { WorkspaceService } from "@/server/modules/workspace/workspace.service";
 import { QuestionGenerationService } from "@/server/modules/interview/question-generation"
 import { QuestionBankService } from "@/server/modules/interview/question-bank"
-import type { FinalInterviewQuestion } from
+import type { FinalInterviewQuestion, TheoryInterviewQuestion } from
   "@/server/modules/interview/interview-builder/interview-builder.types";
 import type {
   QuestionSection,
@@ -122,16 +122,39 @@ async function getCodingQuestions(
 
 }
 
-
 async function getTheoryQuestions(
   workspaceId: string
-) {
+): Promise<TheoryInterviewQuestion[]> {
 
   const workspace = await WorkspaceService.findById(workspaceId);
   if (!workspace) {
     throw new Error("workspace not found");
   }
 
+  const subject = await WorkspaceService.findSubjectByWorkspaceId(workspaceId)
+  if (!subject) {
+    throw new Error("subject not found");
+  }
+
+  const PromptAgrs: TheoryInterviewPrompt = {
+    targetCompany: workspace.target_company,
+    targetRole: workspace.target_role,
+    subject: subject?.subject,
+    yearsOfExperience: workspace.years_of_experience,
+    baseQuestions: 5,
+    followUpQuestions: 5,
+  }
+
+  const llmResponse: LLMTheoryResponse =
+    await QuestionGenerationService.generateTheoryInterviewQuestions(PromptAgrs);
+
+  const theoryQuestions = llmResponse.Theory_Questions;
+
+  return theoryQuestions.map((q, index) => ({
+    qno: index + 1,
+    question: q.question,
+    workspaceId,
+  }));
 }
 
 
@@ -243,4 +266,17 @@ export async function CodingQuestions(
   const codingQuestion = llmResponse.Coding_Questions;
 
   return codingQuestion;
+}
+
+
+/**
+ * 
+ */
+
+export async function TheoryQuestions(
+  workspaceId: string
+) {
+  const theoryQuestions = await getTheoryQuestions(workspaceId);
+  console.log(theoryQuestions)
+  return theoryQuestions;
 }

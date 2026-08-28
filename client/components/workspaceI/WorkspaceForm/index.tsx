@@ -9,8 +9,21 @@ import TextField from "../TextField";
 import InterviewTypeField from "../InterviewTypeField";
 import SubjectField from "../SubjectField";
 import ExperienceField from "../ExperienceField";
-import { ROLE_SUGGESTIONS, TARGET_COMPANIES_SUGGESTIONS } from "../lib/constants";
+import {
+  ROLE_SUGGESTIONS,
+  TARGET_COMPANIES_SUGGESTIONS,
+  EXPERIENCE_VALUE_MAP,
+} from "../lib/constants";
 import type { WorkspaceFormState } from "../lib/types";
+
+type UserResponse = {
+  success?: boolean;
+  data?: {
+    id: number | string;
+  };
+  id?: number | string;
+  error?: string;
+};
 
 const INITIAL_STATE: WorkspaceFormState = {
   workspaceName: "",
@@ -22,7 +35,10 @@ const INITIAL_STATE: WorkspaceFormState = {
 };
 
 interface WorkspaceFormProps {
-  onSuccess?: (workspaceId: string) => void;
+  onSuccess?: (
+    workspaceId: string,
+    interviewType: string,
+  ) => void;
 }
 
 export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
@@ -38,8 +54,9 @@ export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
   const isFormValid = useMemo(() => {
     return (
       form.workspaceName.trim().length > 0 &&
-      form.interviewType !== "" &&
+      form.interviewType.trim().length > 0 &&
       form.subject.trim().length > 0 &&
+      form.targetCompany.trim().length > 0 &&
       form.targetRole.trim().length > 0 &&
       form.yearsOfExperience.trim().length > 0
     );
@@ -51,26 +68,183 @@ export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
     setSubmitError(null);
 
     try {
-      const payload = new FormData();
-      payload.append("workspaceName", form.workspaceName.trim());
-      payload.append("interviewType", form.interviewType);
-      payload.append("subject", form.subject.trim());
-      payload.append("targetCompany", form.targetCompany.trim());
-      payload.append("targetRole", form.targetRole.trim());
-      payload.append("yearsOfExperience", form.yearsOfExperience);
-
-      const res = await fetch("/api/workspace", {
-        method: "POST",
-        body: payload,
+      /*
+       * STEP 0
+       * Get current logged-in user
+       */
+      const userResponse = await fetch("/api/v1/users/me", {
+        method: "GET",
       });
 
-      if (!res.ok) throw new Error("Failed to save workspace");
+      const userResult: UserResponse = await userResponse.json();
 
-      const data = await res.json().catch(() => null);
-      onSuccess?.(data?.workspaceId ?? "");
+      if (!userResponse.ok) {
+        throw new Error(
+          userResult.error || "Failed to get current user."
+        );
+      }
+
+      let userId = userResult.data?.id ?? userResult.id;
+
+      if (userId === undefined || userId === null || userId === "") {
+        throw new Error(
+          "Could not determine the current user's ID."
+        );
+      }
+
+      // CRITICAL FIX: Convert userId to number
+      userId = Number(userId);
+
+      // Validate that it's a valid number
+      if (isNaN(userId)) {
+        throw new Error(
+          "Invalid user ID format. Expected a number."
+        );
+      }
+
+      /*
+       * STEP 1
+       * Check workspace uniqueness
+       */
+      const isUniquePayload = {
+        userId, // Now this will be a number
+        workspace: form.workspaceName.trim(),
+      };
+      console.log("[WorkspaceForm] is-unique payload:", isUniquePayload);
+
+      const isWorkspaceUniqueResponse = await fetch(
+        "/api/v1/workspace/is-unique",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(isUniquePayload),
+        }
+      );
+
+      const isWorkspaceUniqueResult =
+        await isWorkspaceUniqueResponse.json();
+
+      if (!isWorkspaceUniqueResponse.ok) {
+        throw new Error(
+          isWorkspaceUniqueResult.error ||
+          "Failed to check workspace availability."
+        );
+      }
+
+      if (!isWorkspaceUniqueResult.data) {
+        throw new Error(
+          `The workspace "${form.workspaceName.trim()}" already exists. Please choose a different name.`
+        );
+      }
+
+      /*
+        * STEP 2
+        * Create workspace
+        */
+      // In WorkspaceForm, in STEP 2, add this check:
+
+      const yearsOfExperienceNumber = EXPERIENCE_VALUE_MAP[form.yearsOfExperience];
+      if (yearsOfExperienceNumber === undefined || yearsOfExperienceNumber === null) {
+        throw new Error("Please select a valid experience range.");
+      }
+
+      // Additional check: ensure the value is a valid number
+      if (typeof yearsOfExperienceNumber !== 'number' || isNaN(yearsOfExperienceNumber)) {
+        throw new Error("Invalid experience value. Please select a valid experience range.");
+      }
+
+      // Log what we're sending
+      console.log("[WorkspaceForm] form.yearsOfExperience:", form.yearsOfExperience);
+      console.log("[WorkspaceForm] yearsOfExperienceNumber:", yearsOfExperienceNumber);
+
+      const workspacePayload = {
+        workspace: form.workspaceName.trim(),
+        target_company: form.targetCompany.trim(),
+        target_role: form.targetRole.trim(),
+        years_of_experience: yearsOfExperienceNumber,
+        subject: form.subject.trim(),
+        userId: userId,
+      };
+
+      console.log("[WorkspaceForm] Full workspace payload:", JSON.stringify(workspacePayload, null, 2));
+      console.log("[WorkspaceForm] userId type:", typeof userId, "value:", userId);
+
+      const workspaceResponse = await fetch(
+        "/api/v1/workspace/subject-wise",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(workspacePayload),
+        }
+      );
+
+      const workspaceResult =
+        await workspaceResponse.json();
+
+      console.log("[WorkspaceForm] Workspace response:", workspaceResult);
+
+      if (
+        !workspaceResponse.ok ||
+        !workspaceResult.success
+      ) {
+        throw new Error(
+          workspaceResult.error ||
+          "Failed to create workspace."
+        );
+      }
+
+      if (!workspaceResult.data?.id) {
+        throw new Error(
+          "Workspace was created but no workspace ID was returned."
+        );
+      }
+
+      const workspaceId = workspaceResult.data.id;
+
+      /**
+       * STEP 3 
+       * Generate interview questions
+       */
+
+      const interviewEndpoint =
+        form.interviewType === 'theory'
+          ? "/api/v1/interview/workspace/subject-wise"
+          : "/api/v1/interview/workspace/coding"
+
+      const generateRes = await fetch(
+        interviewEndpoint,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            workspaceId,
+          }),
+        }
+      );
+
+      if (!generateRes.ok) {
+        throw new Error(
+          `Failed to generate Interview questions (${generateRes.status}).`
+        );
+      }
+
+      onSuccess?.(
+        workspaceId,
+        form.interviewType
+      );
     } catch (err) {
-      console.error(err);
-      setSubmitError("Something went wrong while saving. Please try again.");
+      console.error("Error in handleSubmit:", err);
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while saving. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }

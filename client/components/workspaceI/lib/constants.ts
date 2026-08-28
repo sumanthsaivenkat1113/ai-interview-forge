@@ -56,3 +56,11 @@ export const THEORY_SUBJECTS = [
   "Python",
   "Operating Systems",
 ];
+
+export const EXPERIENCE_VALUE_MAP: Record<string, number> = {
+  "fresher": 0,
+  "6m-1y": 1,
+  "1-2y": 2,
+  "2-5y": 3,
+  "5y+": 5,
+};

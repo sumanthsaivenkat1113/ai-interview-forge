@@ -1,4 +1,4 @@
-import type { Tone } from "./types";
+import type { Tone } from "@/client/types/results";
 
 /* =========================================================
    Design tokens — semantic color system

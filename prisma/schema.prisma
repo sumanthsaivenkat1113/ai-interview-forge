@@ -45,8 +45,22 @@ model Workspace {
   updatedAt           DateTime          @updatedAt
   questions           questions[]
   codingQuestions     CodingQuestion[]
+  subjects            Subject?
 
   @@unique([userId, workspace])
+}
+
+//////////////////////////////////////////////////////
+// SUBJECT
+//////////////////////////////////////////////////////
+
+model Subject {
+  id          String    @id @default(uuid())
+  workspaceId String    @unique
+  subject     String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 //////////////////////////////////////////////////////

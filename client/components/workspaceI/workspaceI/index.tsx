@@ -1,11 +1,12 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import DashboardSidebar from "../Sidebar";
 import WorkspaceHeader from "../WorkspaceHeader";
 import WorkspaceStepper from "../WorkspaceStepper";
 import WorkspaceForm from "../WorkspaceForm";
 
 export default function WorkspaceI() {
+  const router = useRouter();
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar />
@@ -15,10 +16,10 @@ export default function WorkspaceI() {
           <WorkspaceHeader />
           <WorkspaceStepper currentStep={0} />
           <WorkspaceForm
-            onSuccess={(workspaceId) => {
-              // TODO: route to step 3 (AI Interview) once the backend
-              // returns the created workspace id
-              // router.push(`/dashboard/ai-interview/${workspaceId}`)
+            onSuccess={(workspaceId, interviewType) => {
+              (interviewType === 'theory') ?
+                router.push(`/mock-interview/${workspaceId}`) :
+                router.push(`/coding/${workspaceId}/mi`)
             }}
           />
         </div>

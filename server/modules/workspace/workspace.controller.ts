@@ -112,6 +112,98 @@ export const WorkspaceController = {
                 }
             );
         }
-    }
+    },
+
+    async createSubjectwise(req: NextRequest) {
+        const body = await req.json();
+        const {
+            workspace,
+            target_company,
+            target_role,
+            years_of_experience,
+            userId,
+            subject
+        } = body;
+
+        if (!workspace) {
+            return Response.json(
+                {
+                    success: false,
+                    error: "workspace is required!",
+                },
+                { status: 400 }
+            );
+        }
+
+        if (!target_company) {
+            return Response.json(
+                {
+                    success: false,
+                    error: "target_company is required!",
+                },
+                { status: 400 }
+            );
+        }
+
+        if (!target_role) {
+            return Response.json(
+                {
+                    success: false,
+                    error: "target_role is required!",
+                },
+                { status: 400 }
+            );
+        }
+        if (
+            years_of_experience === undefined ||
+            years_of_experience === null ||
+            typeof years_of_experience !== "number" ||
+            Number.isNaN(years_of_experience)
+        ) {
+            return Response.json(
+                {
+                    success: false,
+                    error: "years_of_experience is required!",
+                },
+                { status: 400 }
+            );
+        }
+
+        if (!userId) {
+            return Response.json(
+                {
+                    success: false,
+                    error: "userId is required!",
+                },
+                { status: 400 }
+            );
+        }
+
+        if (!subject) {
+            return Response.json(
+                {
+                    success: false,
+                    error: "subject is required!",
+                },
+                { status: 400 }
+            );
+        }
+
+        const subejectWiseWorkspace = await WorkspaceService.createSubjectwise(
+            workspace,
+            target_company,
+            target_role,
+            years_of_experience,
+            userId,
+            subject
+        )
+        return Response.json({
+            success: true,
+            data: subejectWiseWorkspace
+        }, {
+            status: 201
+        })
+    },
+
 
 }

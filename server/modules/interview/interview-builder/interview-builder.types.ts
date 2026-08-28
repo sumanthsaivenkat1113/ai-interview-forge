@@ -3,3 +3,10 @@ export interface FinalInterviewQuestion {
   question: string;
   workspaceId: string;
 }
+
+
+export interface TheoryInterviewQuestion {
+  qno: number;
+  question: string;
+  workspaceId: string;
+}

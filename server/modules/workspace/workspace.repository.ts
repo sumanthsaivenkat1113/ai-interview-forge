@@ -149,5 +149,45 @@ export const WorkspaceRepository = {
         });
 
         return existingWorkspace === null;
+    },
+
+
+    async findSubjectByWorkspaceId(workspaceId: string) {
+        return prisma.subject.findUnique({
+            where: {
+                workspaceId
+            },
+        })
+    },
+
+
+    async createSubjectwise(
+        workspace: string,
+        target_company: string,
+        target_role: string,
+        years_of_experience: number,
+        userId: number,
+        subject: string
+    ) {
+        return prisma.workspace.create({
+            data: {
+                workspace,
+                target_company,
+                target_role,
+                years_of_experience,
+                userId,
+
+                subjects: {
+                    create: {
+                        subject,
+                    },
+                },
+            },
+
+            include: {
+                subjects: true,
+            },
+        });
     }
+
 }

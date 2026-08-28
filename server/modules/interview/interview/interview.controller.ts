@@ -193,6 +193,34 @@ export const InterviewController = {
     },
 
 
+    async createSubjectWiseTheoryQuestions(req: NextRequest) {
+        try {
+            const { workspaceId } = await req.json();
+            const interview = await
+                InterviewService.createTheoryInterviewQuestions(workspaceId)
+            return NextResponse.json(
+                {
+                    success: true,
+                    data: interview,
+                },
+                {
+                    status: 201,
+                }
+            );
+        } catch (error: any) {
+            console.error(error);
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: error.message
+                },
+                {
+                    status: 500,
+                }
+            );
+        }
+    },
+
 
 
     async delete(id: string) {

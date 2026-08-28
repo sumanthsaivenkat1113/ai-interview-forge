@@ -1,6 +1,7 @@
 "use client";
 
-import { NAV_SECTIONS } from "@/client/utils/results";
+// import { NAV_SECTIONS } from "@/client/utils/results";
+import { NAV_SECTIONS } from "@/client/utils/mi-coding-results/index";
 
 export function SectionNav({ activeSection }: { activeSection: string }) {
     return (

@@ -9,7 +9,7 @@ export function TopBar({
 }: {
     title: string;
     role: string;
-    language: string;
+    language: string | null;
 }) {
     return (
         <div className="border-b border-border bg-card">
@@ -27,7 +27,9 @@ export function TopBar({
 
                     <div className="flex flex-wrap items-center gap-2">
                         <Chip label="Role" value={role} />
-                        <Chip label="Language" value={language} mono />
+                        {
+                            language && <Chip label="Language" value={language} mono />
+                        }
                     </div>
                 </div>
             </div>

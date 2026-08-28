@@ -3,7 +3,8 @@ import { QuerySchema } from "@/server/modules/interview/interview/interview.sche
 import {
     finalInterviewQuestions,
     finalFMIEInterviewQuestions,
-    CodingQuestions
+    CodingQuestions,
+    TheoryQuestions
 }
     from "@/server/modules/interview/interview-builder/interview-builder.service";
 
@@ -73,6 +74,17 @@ export const InterviewService = {
         console.log(`final Questions -> ${finalQuestions}`)
         return InterviewRepository.createMany(
             finalQuestions.map((q) => ({
+                qno: q.qno,
+                question: q.question,
+                workspaceId,
+            }))
+        );
+    },
+
+    async createTheoryInterviewQuestions(workspaceId: string){
+        const theoryQuestions = await TheoryQuestions(workspaceId);
+        return InterviewRepository.createMany(
+            theoryQuestions.map((q) => ({
                 qno: q.qno,
                 question: q.question,
                 workspaceId,

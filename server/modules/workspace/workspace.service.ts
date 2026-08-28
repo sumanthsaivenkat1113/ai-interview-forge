@@ -61,6 +61,11 @@ export const WorkspaceService = {
     },
 
 
+    async findSubjectByWorkspaceId(workspaceId: string) {
+        return WorkspaceRepository.findSubjectByWorkspaceId(workspaceId)
+    },
+
+
     async create(data: createWorkspaceDTO) {
         return WorkspaceRepository.create(data);
     },
@@ -71,6 +76,24 @@ export const WorkspaceService = {
 
     async getResume(workspaceId: string) {
         return WorkspaceRepository.getResume(workspaceId)
+    },
+
+    async createSubjectwise(
+        workspace: string,
+        target_company: string,
+        target_role: string,
+        years_of_experience: number,
+        userId: number,
+        subject: string
+    ) {
+        return WorkspaceRepository.createSubjectwise(
+            workspace,
+            target_company,
+            target_role,
+            years_of_experience,
+            userId,
+            subject
+        )
     }
 
 }
