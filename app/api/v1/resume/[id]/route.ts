@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
-import { ResumeController } from "@/modules/features/resume/resume.controller";
-import { errorHandler } from "@/modules/features/shared/errorResponse";
+import { ResumeController } from "@/server/modules/resume/resume.controller";
+import { errorHandler } from "@/server/modules/shared/errorResponse";
+
 
 type RouteParams = {
     params: Promise<{ id: string }>
