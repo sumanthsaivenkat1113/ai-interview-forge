@@ -30,7 +30,14 @@ export default function ExperienceField({ value, onChange }: ExperienceFieldProp
         </div>
       </div>
 
-      <Select value={value} onValueChange={onChange}>
+      <Select
+        value={value}
+        onValueChange={(newValue) => {
+          if (newValue !== null) {
+            onChange(newValue);
+          }
+        }}
+      >
         <SelectTrigger className="h-10 border-border/50 bg-background/50 text-sm">
           <SelectValue placeholder="Select experience" />
         </SelectTrigger>
@@ -54,11 +61,10 @@ export default function ExperienceField({ value, onChange }: ExperienceFieldProp
                 key={label}
                 type="button"
                 onClick={() => optionValue && onChange(optionValue)}
-                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                  isSelected
+                className={`rounded-full border px-3 py-1 text-xs transition-colors ${isSelected
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
-                }`}
+                  }`}
               >
                 {label}
               </button>

@@ -1,4 +1,4 @@
-import { PaginationMeta } from "@/modules/features/shared/paginationMeta"
+import { PaginationMeta } from "@/server/modules/shared/paginationMeta"
 
 export interface ApiResponse<T> {
     success: boolean;
