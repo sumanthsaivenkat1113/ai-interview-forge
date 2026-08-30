@@ -1432,7 +1432,7 @@ git clone <repository-url>
 ## 2. Navigate to the Project
 
 ```bash
-cd AI-InterviewForge
+cd ai-interview-forge
 ```
 
 ---
