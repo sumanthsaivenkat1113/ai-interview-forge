@@ -56,7 +56,7 @@ export default function ResumeUploadField({
         </div>
       </div>
 
-      <p className="mb-3 text-xs text-muted-foreground/70">PDF, DOCX</p>
+      <p className="mb-3 text-xs text-muted-foreground/70">PDF</p>
 
       <input
         ref={inputRef}
