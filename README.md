@@ -1457,6 +1457,7 @@ CLERK_SECRET_KEY=
 
 GROQ_API_KEY=
 
+ONLINE_COMPILER_ENDPOINT=https://api.onlinecompiler.io/api/run-code-sync/
 ONLINE_COMPILER_API_KEY=
 
 NEXT_PUBLIC_APP_URL=
