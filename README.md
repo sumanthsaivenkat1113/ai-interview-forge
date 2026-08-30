@@ -1408,6 +1408,7 @@ CLERK_SECRET_KEY=
 GROQ_API_KEY=
 
 # Online Compiler
+ONLINE_COMPILER_ENDPOINT=https://api.onlinecompiler.io/api/run-code-sync/
 ONLINE_COMPILER_API_KEY=
 
 # Application
