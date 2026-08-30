@@ -17,6 +17,9 @@ import { OverviewSection } from "@/client/components/mi/coding/results/OverviewS
 import { CodingEvaluationSection } from "@/client/components/results/CodingEvaluationSection";
 import { CodingProblemsSection } from "@/client/components/results/CodingProblemsSection";
 
+import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation';
+
 /* =========================================================
    Page
 ========================================================= */
@@ -36,6 +39,17 @@ export default function ResultsPage() {
     const [activeSection, setActiveSection] =
         useState<string>("overview");
 
+    const router = useRouter();
+    const { isLoaded, isSignedIn } = useAuth();
+
+
+    // Route Protection
+    useEffect(() => {
+        // If Clerk has loaded and user is not signed in, redirect them
+        if (isLoaded && !isSignedIn) {
+            router.push('/');
+        }
+    }, [isLoaded, isSignedIn, router]);
 
 
     /* =====================================================

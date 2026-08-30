@@ -119,12 +119,97 @@ export const WorkspaceRepository = {
         })
     },
 
-    async delete(id: string): Promise<workspace> {
-        return prisma.workspace.delete({
-            where: { id }
-        })
-    },
+    async delete(workspaceId: string) {
+        return prisma.$transaction(async (tx) => {
 
+            // Get workspace name because InterviewEvaluation
+            // uses `workspace`, not `workspaceId`
+            const workspaceRecord = await tx.workspace.findUnique({
+                where: {
+                    id: workspaceId,
+                },
+                select: {
+                    workspace: true,
+                },
+            });
+
+            if (!workspaceRecord) {
+                throw new Error("Workspace not found");
+            }
+
+            /*
+             * Delete coding evaluation.
+             *
+             * CodingEvaluationQuestion will cascade.
+             */
+            await tx.codingEvaluation.deleteMany({
+                where: {
+                    workspaceId,
+                },
+            });
+
+            /*
+             * Delete interview evaluation.
+             *
+             * All its children will cascade.
+             */
+            await tx.interviewEvaluation.deleteMany({
+                where: {
+                    workspace: workspaceRecord.workspace,
+                },
+            });
+
+            /*
+             * Delete questions.
+             *
+             * Answers will cascade.
+             */
+            await tx.questions.deleteMany({
+                where: {
+                    workspaceId,
+                },
+            });
+
+            /*
+             * Delete coding questions.
+             *
+             * CodingAnswers will cascade.
+             */
+            await tx.codingQuestion.deleteMany({
+                where: {
+                    workspaceId,
+                },
+            });
+
+            /*
+             * Delete direct workspace data
+             */
+            await tx.subject.deleteMany({
+                where: {
+                    workspaceId,
+                },
+            });
+
+            await tx.resumePdfDetails.deleteMany({
+                where: {
+                    workspaceId,
+                },
+            });
+
+            /*
+             * Finally delete workspace
+             */
+            await tx.workspace.delete({
+                where: {
+                    id: workspaceId,
+                },
+            });
+
+            return {
+                success: true,
+            };
+        });
+    },
 
     async getResume(workspaceId: string) {
         return prisma.resumePdfDetails.findUnique({
@@ -188,6 +273,46 @@ export const WorkspaceRepository = {
                 subjects: true,
             },
         });
+    },
+
+    async getAllSubjectwise() {
+        return prisma.workspace.findMany({
+            include: {
+                subjects: true,
+            },
+        });
+    },
+
+    async isTheoryOrCoding(workspaceId: string): Promise<"theory" | "coding"> {
+        const [theoryQuestion, codingQuestion] = await Promise.all([
+            prisma.questions.findFirst({
+                where: {
+                    workspaceId,
+                },
+                select: {
+                    id: true,
+                },
+            }),
+
+            prisma.codingQuestion.findFirst({
+                where: {
+                    workspaceId,
+                },
+                select: {
+                    id: true,
+                },
+            }),
+        ]);
+
+        // Theory questions exist and coding questions do not exist
+        if (theoryQuestion && !codingQuestion) {
+            return "theory";
+        }
+
+        // Otherwise, it is coding
+        return "coding";
+
     }
+
 
 }

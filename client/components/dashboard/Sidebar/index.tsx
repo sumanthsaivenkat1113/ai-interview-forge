@@ -19,12 +19,12 @@ const links = [
   },
   {
     title: "My Interviews",
-    href: "/dashboard/interviews",
+    href: "/my-interviews",
     icon: FolderOpen,
   },
   {
     title: "Reports",
-    href: "/dashboard/reports",
+    href: "/reports",
     icon: BarChart3,
   },
 ];
@@ -51,12 +51,13 @@ export default function DashboardSidebar() {
               <Link
                 key={item.title}
                 href={item.href}
+                target={item.title === "Reports" ? "_blank" : undefined}
+                rel={item.title === "Reports" ? "noopener noreferrer" : undefined}
                 className={`
                   group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  ${
-                    item.active
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ${item.active
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }
                 `}
               >
@@ -64,10 +65,9 @@ export default function DashboardSidebar() {
                   size={18}
                   className={`
                     transition-colors
-                    ${
-                      item.active
-                        ? "text-foreground"
-                        : "text-muted-foreground group-hover:text-foreground"
+                    ${item.active
+                      ? "text-foreground"
+                      : "text-muted-foreground group-hover:text-foreground"
                     }
                   `}
                 />

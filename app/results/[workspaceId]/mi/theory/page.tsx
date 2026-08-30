@@ -19,11 +19,16 @@ import { TheoryEvaluationSection } from "@/client/components/results/TheoryEvalu
 import { TheoryQuestionsSection } from "@/client/components/results/TheoryQuestionsSection";
 import { CodingProblemsSection } from "@/client/components/results/CodingProblemsSection";
 
+import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation';
+
 /* =========================================================
    Page
 ========================================================= */
 
 export default function ResultsPage() {
+    const router = useRouter();
+    const { isLoaded, isSignedIn } = useAuth();
     const params = useParams();
 
     const workspaceId = params.workspaceId as string;
@@ -37,6 +42,14 @@ export default function ResultsPage() {
 
     const [activeSection, setActiveSection] =
         useState<string>("overview");
+
+    // Route Protection
+    useEffect(() => {
+        // If Clerk has loaded and user is not signed in, redirect them
+        if (isLoaded && !isSignedIn) {
+            router.push('/');
+        }
+    }, [isLoaded, isSignedIn, router]);
 
 
 

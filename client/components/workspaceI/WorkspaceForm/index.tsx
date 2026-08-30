@@ -16,6 +16,10 @@ import {
 } from "../lib/constants";
 import type { WorkspaceFormState } from "../lib/types";
 
+import WorkspaceLoadingOverlay, {
+  type LoadingStep,
+} from "@/client/components/WorkspaceLoadingOverlay";
+
 type UserResponse = {
   success?: boolean;
   data?: {
@@ -42,6 +46,22 @@ interface WorkspaceFormProps {
 }
 
 export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
+
+  const STEP_LABELS = [
+    "Setting up your workspace",
+    "Generating personalized interview questions",
+  ];
+
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const buildSteps = (active: number): LoadingStep[] =>
+    STEP_LABELS.map((label, i) => ({
+      label,
+      status:
+        i < active ? "complete" : i === active ? "active" : "pending",
+    }));
+
+
   const [form, setForm] = useState<WorkspaceFormState>(INITIAL_STATE);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -205,6 +225,8 @@ export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
 
       const workspaceId = workspaceResult.data.id;
 
+      setCurrentStep(1);
+
       /**
        * STEP 3 
        * Generate interview questions
@@ -234,6 +256,8 @@ export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
         );
       }
 
+      setCurrentStep(2);
+
       onSuccess?.(
         workspaceId,
         form.interviewType
@@ -247,6 +271,7 @@ export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
       );
     } finally {
       setIsSubmitting(false);
+      setCurrentStep(0);
     }
   };
 
@@ -363,6 +388,9 @@ export default function WorkspaceForm({ onSuccess }: WorkspaceFormProps) {
           )}
         </Button>
       </div>
+      {isSubmitting && (
+        <WorkspaceLoadingOverlay steps={buildSteps(currentStep)} />
+      )}
     </div>
   );
 }

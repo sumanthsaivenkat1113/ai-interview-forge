@@ -60,6 +60,31 @@ export const WorkspaceController = {
     },
 
 
+    async getAllSubjectwise() {
+        const result: any = await WorkspaceService.getAllSubjectwise();
+        return Response.json({
+            success: true,
+            message: result
+        })
+    },
+
+
+    async isTheoryOrCoding(req: NextRequest) {
+        const body = await req.json();
+        const { workspaceId } = body;
+        if (!workspaceId) {
+            return Response.json({
+                success: false,
+                message: 'workspaceId is required'
+            })
+        }
+        const result: any = await WorkspaceService.isTheoryOrCoding(workspaceId)
+        return Response.json({
+            success: true,
+            data: result
+        })
+    },
+
 
 
     async isWorkspaceUnique(req: Request) {

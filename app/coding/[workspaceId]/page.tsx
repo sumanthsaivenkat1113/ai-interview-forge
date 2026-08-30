@@ -9,6 +9,7 @@ import { EditorToolbar } from "@/client/components/coding-interview/EditorToolba
 import { CodeArea } from "@/client/components/coding-interview/CodeArea";
 import { Console } from "@/client/components/coding-interview/Console";
 
+
 export { compilers } from "@/client/constants/coding-interview/constants";
 
 /* =========================================================
@@ -41,6 +42,9 @@ export default function CodeEditor() {
         handleCodeChange,
         runCode,
         submitInterview,
+        currentStep,
+        ResultsLoadingOverlay,
+        buildSteps
     } = useCodeEditor();
 
     /* =====================================================
@@ -141,6 +145,9 @@ export default function CodeEditor() {
                     />
                 </section>
             </main>
+            {isSubmitting && (
+                <ResultsLoadingOverlay steps={buildSteps(currentStep)} />
+            )}
         </div>
     );
 }

@@ -11,6 +11,8 @@ import { Console } from "@/client/components/coding-interview/Console";
 
 export { compilers } from "@/client/constants/coding-interview/constants";
 
+
+
 /* =========================================================
    COMPONENT
 ========================================================= */
@@ -41,7 +43,12 @@ export default function CodeEditor() {
         handleCodeChange,
         runCode,
         submitInterview,
+        currentStep,
+        ResultsLoadingOverlay,
+        buildSteps
     } = useCodeEditor();
+
+
 
     /* =====================================================
        INTERVIEW ERROR (doesn't exist / already completed)
@@ -141,6 +148,9 @@ export default function CodeEditor() {
                     />
                 </section>
             </main>
+            {isSubmitting && (
+                <ResultsLoadingOverlay steps={buildSteps(currentStep)} />
+            )}
         </div>
     );
 }

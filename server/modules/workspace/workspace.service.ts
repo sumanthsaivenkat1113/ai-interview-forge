@@ -46,6 +46,10 @@ export const WorkspaceService = {
         };
     },
 
+    async getAllSubjectwise() {
+        return WorkspaceRepository.getAllSubjectwise()
+    },
+
     async findById(id: string) {
         return WorkspaceRepository.findById(id);
     },
@@ -94,6 +98,10 @@ export const WorkspaceService = {
             userId,
             subject
         )
+    },
+
+    async isTheoryOrCoding(workspaceId: string) {
+        return WorkspaceRepository.isTheoryOrCoding(workspaceId)
     }
 
 }

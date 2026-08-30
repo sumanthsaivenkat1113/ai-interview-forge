@@ -15,6 +15,14 @@ import {
     ExecutionMeta,
 } from "@/client/types/coding-interview/types";
 
+
+import ResultsLoadingOverlay, {
+    type LoadingStep,
+} from "@/client/components/ResultsLoadingOverlay";
+
+import { useAuth } from '@clerk/nextjs'
+
+
 /* =========================================================
    TYPES
 ========================================================= */
@@ -33,6 +41,32 @@ type InterviewError = {
 export function useCodeEditor() {
     const params = useParams();
     const router = useRouter();
+
+
+
+    const { isLoaded, isSignedIn } = useAuth();
+
+
+    // Route Protection
+    useEffect(() => {
+        // If Clerk has loaded and user is not signed in, redirect them
+        if (isLoaded && !isSignedIn) {
+            router.push('/');
+        }
+    }, [isLoaded, isSignedIn, router]);
+
+    const STEP_LABELS = [
+        "Generating personalized interview Results",
+    ];
+
+    const [currentStep, setCurrentStep] = useState(0);
+
+    const buildSteps = (active: number): LoadingStep[] =>
+        STEP_LABELS.map((label, i) => ({
+            label,
+            status:
+                i < active ? "complete" : i === active ? "active" : "pending",
+        }));
 
 
     /*
@@ -507,6 +541,7 @@ export function useCodeEditor() {
             /*
              * Interview completed.
              */
+            setCurrentStep(1)
 
             router.push(`/results/${workspaceId}/mi/coding`);
         } catch (error: any) {
@@ -517,6 +552,7 @@ export function useCodeEditor() {
             );
         } finally {
             setIsSubmitting(false);
+            setCurrentStep(0)
         }
     }
 
@@ -560,5 +596,10 @@ export function useCodeEditor() {
         handleCodeChange,
         runCode,
         submitInterview,
+
+        // loading
+        currentStep,
+        ResultsLoadingOverlay,
+        buildSteps
     };
 }

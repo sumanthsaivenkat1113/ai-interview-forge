@@ -10,6 +10,9 @@ import type {
     WorkspaceResponse,
 } from "@/client/types/results";
 
+import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation';
+
 import { NAV_SECTIONS } from "@/client/utils/results";
 
 import { TopBar } from "@/client/components/results/TopBar";
@@ -39,7 +42,17 @@ export default function ResultsPage() {
     const [activeSection, setActiveSection] =
         useState<string>("overview");
 
+    const router = useRouter();
+    const { isLoaded, isSignedIn } = useAuth();
 
+
+    // Route Protection
+    useEffect(() => {
+        // If Clerk has loaded and user is not signed in, redirect them
+        if (isLoaded && !isSignedIn) {
+            router.push('/');
+        }
+    }, [isLoaded, isSignedIn, router]);
 
     /* =====================================================
        Fetch APIs

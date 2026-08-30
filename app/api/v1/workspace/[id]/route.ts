@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { WorkspaceController } from "@/modules/features/workspace/workspace.controller";
-import { errorHandler } from "@/modules/features/shared/errorResponse";
+import { WorkspaceController } from "@/server/modules/workspace/workspace.controller";
+import { errorHandler } from "@/server/modules/shared/errorResponse";
 
 type RouteParams = {
     params: Promise<{ id: string }>

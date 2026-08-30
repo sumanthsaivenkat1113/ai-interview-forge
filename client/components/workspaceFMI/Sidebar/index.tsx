@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   Home,
@@ -13,23 +14,23 @@ import Logo from "../../landing/logo";
 const links = [
   {
     title: "Home",
-    href: "/dashboard",
+    href: "/home",
     icon: Home,
-    active: true,
   },
   {
     title: "My Interviews",
-    href: "/dashboard/interviews",
+    href: "/my-interviews",
     icon: FolderOpen,
   },
   {
     title: "Reports",
-    href: "/dashboard/reports",
+    href: "/reports",
     icon: BarChart3,
   },
 ];
 
 export default function DashboardSidebar() {
+  const pathname = usePathname();
   return (
     <aside className="hidden w-72 shrink-0 border-r bg-background lg:flex lg:flex-col">
       {/* Logo */}
@@ -46,17 +47,19 @@ export default function DashboardSidebar() {
         <nav className="space-y-1">
           {links.map((item) => {
             const Icon = item.icon;
+            const active = pathname === item.href;
 
             return (
               <Link
                 key={item.title}
                 href={item.href}
+                target={item.title === "Reports" ? "_blank" : undefined}
+                rel={item.title === "Reports" ? "noopener noreferrer" : undefined}
                 className={`
                   group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
-                  ${
-                    item.active
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ${active
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }
                 `}
               >
@@ -64,10 +67,9 @@ export default function DashboardSidebar() {
                   size={18}
                   className={`
                     transition-colors
-                    ${
-                      item.active
-                        ? "text-foreground"
-                        : "text-muted-foreground group-hover:text-foreground"
+                    ${active
+                      ? "text-foreground"
+                      : "text-muted-foreground group-hover:text-foreground"
                     }
                   `}
                 />

@@ -19,6 +19,10 @@ import Interviewer from '@/client/components/theory-interview/Interviewer';
 import AnswerRecorder from '@/client/components/theory-interview/AnswerRecorder';
 import InterviewControls from '@/client/components/theory-interview/InterviewControls';
 
+import ResultsLoadingOverlay, {
+    type LoadingStep,
+} from "@/client/components/ResultsLoadingOverlay";
+
 interface Question {
     id: string;
     qno: number;
@@ -77,6 +81,19 @@ export default function ViewInterviewQuestions() {
     const [answers, setAnswers] = useState<InterviewAnswer[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const hasInitialized = useRef(false);
+
+    const STEP_LABELS = [
+        "Generating personalized interview Results",
+    ];
+
+    const [currentStep, setCurrentStep] = useState(0);
+
+    const buildSteps = (active: number): LoadingStep[] =>
+        STEP_LABELS.map((label, i) => ({
+            label,
+            status:
+                i < active ? "complete" : i === active ? "active" : "pending",
+        }));
 
     // Route Protection
     useEffect(() => {
@@ -338,6 +355,7 @@ export default function ViewInterviewQuestions() {
                 return;
             }
 
+            setCurrentStep(1)
 
             router.push(`/results/${workspaceId}/mi/theory`);
         } catch (err) {
@@ -345,6 +363,7 @@ export default function ViewInterviewQuestions() {
             setError('Could not save your interview. Please try again.');
         } finally {
             setIsSubmitting(false);
+            setCurrentStep(0)
         }
     }
 
@@ -461,6 +480,9 @@ export default function ViewInterviewQuestions() {
                         <div className="mt-4 text-center text-sm text-muted-foreground">Saving your interview…</div>
                     )}
                 </div>
+                {isSubmitting && (
+                    <ResultsLoadingOverlay steps={buildSteps(currentStep)} />
+                )}
             </main>
         </Shell>
     );
