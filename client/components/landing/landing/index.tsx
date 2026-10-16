@@ -1,15 +1,3 @@
-// import Navbar from "../navbar";
-
-// export default function Landing(){
-//     return(
-//         <>
-//         <Navbar/>
-//         </>
-//     )
-// }
-
-
-
 import Navbar from "../navbar";
 import Hero from "../Hero";
 import HowItWorks from "../HowItWorks";

@@ -10,8 +10,9 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Your App",
-  description: "Modern Next.js Application",
+  title: "AI InterviewForge",
+  description:
+    "Prepare for technical interviews with AI-powered mock interviews, coding challenges, and personalized feedback.",
 };
 
 export default function RootLayout({
